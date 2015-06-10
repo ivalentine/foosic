@@ -1,16 +1,311 @@
-// Place all the styles related to the Boards controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+/* GENERAL PAGE STYLING */
+html body {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
-.pad {
-  height: 33.3333333%;
+html, body {
+  height: 100%;
+}
+
+#wrapper {
+  height: 100%;
   background-color: black;
+}
+
+div#page-content-wrapper {
+  height: 100%;
+  padding: 0;
+}
+
+/* remove blue glow on focus */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+#menu-toggle:focus {
+  outline: none;
+}
+
+/* SIDEBAR STYLING */
+/* styles for  < icon used to show/hide the sidebar */
+button#menu-toggle {
+  position: absolute;
+  z-index: 10;
+  background-color: #2D2D2D;
+  border: none;
+  border-radius: 0;
+}
+
+/* make the < arrow blue */
+span#menu-arrow {
+  font-size: 1.5em;
+  color: blue;
+}
+
+/* set sidebar background */
+div#sidebar-wrapper {
+  background-color: #2D2D2D;
+}
+
+/* style sidebar menu items */
+ul.sidebar-nav a {
+  padding-top: 1.5%;
+  padding-bottom: 1.5%;
+  cursor: pointer;
+  font-size: 2em;
+}
+
+ul.sidebar-nav li {
+  margin: 0;
+}
+
+/* theme-specific coloring */
+li.change-pad a {
+  color: yellow;
+}
+
+li.connection a {
+  color: red;
+}
+
+li.load-board a {
+  color: orange;
+}
+
+li.save-board a {
+  color: purple;
+}
+
+li.add-sample a {
+  color: green;
+}
+
+li.sign-up a {
+  color: white;
+}
+
+li.sign-in a {
+  color: grey;
+}
+
+li.sign-out a {
+  color: grey;
+}
+
+/* PAD STYLING */
+.pad {
+  height: 33.333%;
+  background: rgba(0,0,0,0);
   text-align: center;
   font-size: 23vh;
+  color: blue;
+}
+
+/* Add pad colors for flashing when played */
+.pad.blue {
+  background-color: blue;
+}
+
+.pad.yellow {
+  background-color: yellow;
+}
+
+.pad.purple {
+  background-color: purple;
+}
+
+.pad.green {
+  background-color: green;
+}
+
+.pad.white {
+  background-color: white;
+}
+
+.pad.red {
+  background-color: red;
+}
+
+.pad-orange {
+  background-color: orange;
+}
+
+/* Styling to be used when choosing a pad to change its samples */
+.pad.selectable {
+  background-color: #2D2D2D;
+  cursor: pointer;
+}
+
+/* GENERAL MODAL STYLING */
+/* container */
+div.modal-content {
+  background-color: #3A3A3A;
+  border-radius: 0;
+  border-color: black;
+}
+
+/* header */
+div.modal-header {
+  background-color: #2C2C2C;
+  border-bottom: none;
+  font-size: 2em;
+}
+
+/* body */
+div.modal-body {
+  font-size: 2em;
+  padding: 0;
+  border-radius: 0;
+  height: 60vh;
+  overflow: scroll;
+}
+
+/* lists in body */
+.modal-ul {
+  list-style-type: none;
+  cursor: pointer;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.modal-ul li:hover {
+  background-color: grey;
+}
+
+.modal-ul li {
+  padding-left: 20px;
+}
+
+/* footer */
+div.modal-footer {
+  background-color: #2C2C2C;
+  border-top: none;
+}
+
+/* footer buttons */
+.modal button.btn {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 2em;
+  border-radius: 0;
+  background-color: black;
+  border-style: none;
+}
+
+.modal button.btn:hover {
+  background-color: grey;
+}
+
+/* flash message modals */
+.message-modal .modal-dialog {
+  margin-top: 30vh;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+/* ACTION-SPECIFIC MODAL THEMES */
+/* intro message */
+#intro-message-modal {
+  color: blue;
+}
+
+/* change pad modals */
+.change-pad .modal-header {
+  color: yellow;
+}
+
+.change-pad .modal-body {
+  color: yellow;
+}
+
+.change-pad .modal-footer button {
+  color: yellow;
+}
+
+/* connection modals */
+.connection .modal-header {
+  color: red;
+}
+
+.connection-black.modal-header {
   color: black;
 }
 
-.pad:hover {
-  background-color: blue;
-  cursor: pointer;
+.connection .modal-body {
+  color: red;
+}
+
+
+.sample-list.activeSample {
+  background-color: black;
+}
+
+/* load board modals */
+.load-boards .modal-header {
+  color: orange;
+}
+
+.load-boards .modal-body {
+  color: orange;
+}
+
+/* save board modals */
+.save-board .modal-header {
+  color: purple;
+}
+
+.save-board button {
+  color: purple;
+}
+
+#board-name-input {
+    width: 100%;
+    padding: 3vh;
+    margin: 0;
+    font-size: 1em;
+    background: rgba(0,0,0,0);
+    border: none;
+    color: purple;
+}
+
+#board-save-modal .modal-body {
+  height: 10vh;
+}
+
+/* LOOPER ANIMATION LAYER STYLING */
+#player-layer {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background-color: grey;
+  display: none;
+}
+
+#player-layer.show {
+  display: block;
+}
+
+#recording-layer {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background-color: red;
+  display: none;
+}
+
+#recording-layer.show {
+  display: block;
+}
+
+/* NOTICE STYLING (TOP BAR SHOWING SIGN IN STATUS) */
+.notice {
+  background-color: #2D2D2D;
+  padding: 10px;
+  font-size: 1.5em;
+  margin-bottom: 0;
+  color: pink;
 }

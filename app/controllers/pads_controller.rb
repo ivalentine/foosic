@@ -1,2 +1,0 @@
-class PadsController < ApplicationController
-end

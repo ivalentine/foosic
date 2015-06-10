@@ -1,8 +1,23 @@
 Rails.application.routes.draw do
-  resources :pads
+  devise_for :users, controllers: { sessions: "users/sessions" }
+
+  get 'samples/new_html' => 'samples#new_html'
+  get 'boards/lookup' => 'boards#lookup'
+
+  resources :samples
 
   resources :boards
 
+  root 'boards#show'
+
+  get 'kanye' => 'boards#show'
+
+
+  devise_scope :user do
+    post "users/save_token" => 'users/sessions#save_token'
+    get "users/save_token" => 'users/sessions#save_token'
+    get "users/lookup" => 'users/sessions#lookup'
+  end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

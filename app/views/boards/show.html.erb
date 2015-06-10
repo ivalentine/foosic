@@ -1,5 +1,237 @@
-<p>Hello world!</p>
-<%= @board.pads.first.sample %>
-<% @board.pads.each_with_index do |pad, index| %>
-  <div id="pad-<%= index %>" data-url="<%= pad.sample %>" class="button col-md-4 pad">Q</div>
-<% end %>
+<!-- rails indicator to include board js -->
+<%= javascript_include_tag "web_audio_helpers" %>
+<%= javascript_include_tag "sample_menu" %>
+<%= javascript_include_tag "looping_helpers" %>
+<%= javascript_include_tag "board_helpers" %>
+<%= javascript_include_tag "peerjs_connection_helpers" %>
+
+<%= javascript_include_tag "board" %>
+<script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.10.2/dropbox.min.js">
+</script>
+
+
+
+<!-- end rails indicator -->
+<!-- full page wrapper -->
+<div id="wrapper" class="toggled">
+    <!-- sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="change-pad">
+                <a id="change-pad">CHANGE PAD</a>
+            </li>
+            <li class="connection">
+                <a id="connect">CONNECT</a>
+            </li>
+            <li class="load-board">
+                <a id="load-board">LOAD BOARD</a>
+            </li>
+            <li class="save-board">
+                <a id="save-board">SAVE BOARD</a>
+            </li>
+            <li class="add-sample">
+                <%= link_to "ADD SAMPLE", new_sample_path %>
+            </li>
+            <% if user_signed_in? %>
+                <div id="username-hidden" style="display:none"><%= current_user.username %></div>
+                <li class="sign-out">
+                    <%= link_to "SIGNOUT", destroy_user_session_path, method: :delete %>
+                </li>
+            <% else %>
+                <li class="sign-out">
+                    <%= link_to "SIGN IN", new_user_session_path  %>
+                </li>
+                <li class="sign-up">
+                    <%= link_to "SIGN UP", new_user_registration_path  %>
+                </li>
+            <% end %>
+
+        </ul>
+    </div>
+    <!-- end sidebar -->
+    <!-- main page -->
+    <div id="page-content-wrapper">
+        <!-- hidden first visit indicator -->
+        <div id="first-visit-indicator" style="display:none"><%= @first_visit %></div>
+        <!-- end hidden first visit indicator -->
+
+        <!-- animation layers for looper -->
+        <div id="player-layer"></div>
+        <div id="recording-layer"></div>
+        <!-- end animation layers -->
+
+        <!-- toggle button -->
+        <button class="btn btn-default" id="menu-toggle"><span id="menu-arrow" class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+        <!-- end toggle button -->
+
+        <!-- board -->
+        <div id="pad-0" data-id="0" class="button col-md-4 pad">T</div>
+        <div id="pad-1" data-id="1" class="button col-md-4 pad">Y</div>
+        <div id="pad-2" data-id="2" class="button col-md-4 pad">U</div>
+        <div id="pad-3" data-id="3" class="button col-md-4 pad">G</div>
+        <div id="pad-4" data-id="4" class="button col-md-4 pad">H</div>
+        <div id="pad-5" data-id="5" class="button col-md-4 pad">J</div>
+        <div id="pad-6" data-id="6" class="button col-md-4 pad">B</div>
+        <div id="pad-7" data-id="7" class="button col-md-4 pad">N</div>
+        <div id="pad-8" data-id="8" class="button col-md-4 pad">M</div>
+        <!-- end board -->
+
+        <!-- intro message modal -->
+        <div id="intro-message-modal" class="message-modal modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        TURN SOUND ON AND TYPE TO PLAY
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end intro message modal -->
+
+        <!-- modal select pad message -->
+        <div id="select-a-pad-modal" class="change-pad message-modal modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        CLICK A PAD TO CHANGE ITS SAMPLE
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end select-a-pad modal -->
+
+        <!-- modal sign-in-to-save message -->
+        <div id="sign-in-to-save-modal" class="save-board message-modal modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        YOU MUST SIGN IN / SIGN UP TO SAVE
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end sign-in-to-save modal -->
+
+        <!-- sample selection modal -->
+        <div id="sampleModal" class="change-pad modal fade" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            CHOOSE A SAMPLE
+                        </div>
+                        <div class="modal-body">
+                            <ul id="sample-list" class="modal-ul">
+                            </ul>
+                            <!-- append options here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" id="confirm-sample">CONFIRM</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        <!-- end modal -->
+
+        <!-- connection message modal -->
+        <div id="connection-message-modal" class="connection message-modal modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <p id="connection-message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end connection message modal -->
+
+        <!-- online users modal -->
+        <div id="online-users-modal" class="connection modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- modal content-->
+                <div class="modal-content">
+                    <div class="connection-black modal-header">
+                        <span class="modal-title" id="username-message">YOU ARE <span id="username-for-connection" style="color:red"></span><br />
+                        <span class="modal-title">CONNECT WITH SOMEONE ELSE ONLINE...</span>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="online-users" class="modal-ul">
+                            <li class="online-user">no one's online :(</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- end modal -->
+
+        <!-- connection requested modal -->
+        <div id="connection-requested-modal" class="connection modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="requested-connection"></h3>
+                    </div>
+                    <div class="modal-footer" style="text-align:center">
+                        <button type="button" class="btn btn-success" data-dismiss="modal" id="confirm-connection-request">CONFIRM</button>
+                        <button type="button" class="btn btn-success" data-dismiss="modal" id="reject-connection-request">REJECT</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- end connection requested modal -->
+
+        <!-- list boards modal -->
+        <div id="list-boards-modal" class="load-boards modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        CHOOSE A BOARD
+                    </div>
+                    <div class="modal-body">
+                        <ul id="list-boards-ul" class="modal-ul">
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- end load boards modal -->
+        <!-- board save modal -->
+         <div id="board-save-modal" class="save-board modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        SAVE BOARD AS
+                    </div>
+                    <div class="modal-body">
+                        <form action>
+                            <input type="text" id="board-name-input" onfocus="this.value = '';" value="enter a name here">
+                        </form>
+                        <!-- append options here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal" id="confirm-board-save">SAVE</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- end board save modal -->
+
+    </div>
+    <!-- end main page -->
+</div>
+
+<!-- end full page wrapper -->

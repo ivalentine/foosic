@@ -11,20 +11,55 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150601210103) do
+ActiveRecord::Schema.define(version: 20150610001251) do
+
+  create_table "board_samples", force: :cascade do |t|
+    t.integer  "board_id"
+    t.integer  "sample_id"
+    t.integer  "pad_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "board_samples", ["board_id"], name: "index_board_samples_on_board_id"
+  add_index "board_samples", ["sample_id"], name: "index_board_samples_on_sample_id"
 
   create_table "boards", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "pads", force: :cascade do |t|
-    t.string   "sample"
-    t.integer  "board_id"
+  create_table "samples", force: :cascade do |t|
+    t.string   "name"
+    t.string   "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "user_id"
   end
 
-  add_index "pads", ["board_id"], name: "index_pads_on_board_id"
+  add_index "samples", ["user_id"], name: "index_samples_on_user_id"
+
+  create_table "users", force: :cascade do |t|
+    t.string   "email",                  default: "", null: false
+    t.string   "encrypted_password",     default: "", null: false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",          default: 0,  null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.string   "dropbox_token"
+    t.string   "username"
+  end
+
+  add_index "users", ["email"], name: "index_users_on_email", unique: true
+  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  add_index "users", ["username"], name: "index_users_on_username", unique: true
 
 end

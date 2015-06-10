@@ -1,0 +1,99 @@
+<h1>Hello <%= current_user.email  %></h1>
+
+
+<!-- 
+TODO
+//build a recorder_builder that returns a recorder object with tonsa methods I want, initialize being the main one
+
+Record button and audio display
+Record, stop buttons
+save button
+  saves file to dropbox
+  saves file in database (need migration to adjust for this?)
+
+
+ -->
+
+<div id="signin-button" class="btn btn-info"></div>
+<div id="recordingslist" style="display: block; margin-bottom: 10px;"></div>
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.10.2/dropbox.min.js">
+
+
+</script>
+
+<%= javascript_include_tag "new_sample" %>
+
+<script>
+
+$(document).ready(function() {
+  var client;
+  var context = new AudioContext();
+
+  //takes user token from database and returns authenticated client object
+  function authenticateFromDatabase(token){
+    var client = new Dropbox.Client({token: token})
+    console.log("I got yr dropbox info so I logged you in!!!!")
+    return client;
+  }
+
+  function saveUser (token){
+    $.post( "/users/save_token", {dropBoxToken:token});
+  }
+  function handleError(error){
+    console.log(error);
+  }
+
+  function dropboxSignInFlow(client){
+    var buttonDiv = $("#signin-button");
+    buttonDiv.append("Click here to Sign In to Dropbox")
+    buttonDiv.on("click", function() {
+      // The user will have to click an 'Authorize' button.
+      client.authenticate(function(error, client) {
+        if (error) {
+          return handleError(error);
+        }
+      });
+    });
+  }
+
+
+  function authenticateWithDropbox(error, client){
+    if (error) {
+      return handleError(error);
+    }
+    //if they are back from flow, save user's token in DB 
+    if (client.isAuthenticated()) {
+      saveUser(client.credentials().token)
+      console.log("you have been authenticated!")
+      initializeRecorder(client, context);
+
+    } else {
+      // show and set up the "Sign into Dropbox" button
+      //once they click and authenticate they will come back to this page authenticated
+      dropboxSignInFlow(client);
+    }
+
+  }
+
+
+  $.getJSON( "/samples/new.json", function( data ) {
+
+    //if there's a user token from db, authenticate with that
+    if(data.user_token !== null){
+      client = authenticateFromDatabase(data.user_token);
+      initializeRecorder(client, context);
+    }
+    else {
+    //create client object from our app_key
+    client = new Dropbox.Client({ key: data.app_key });
+    //send user through authentication process
+      client.authenticate({interactive: false}, authenticateWithDropbox);
+    }
+  });
+
+});
+
+</script>
+
