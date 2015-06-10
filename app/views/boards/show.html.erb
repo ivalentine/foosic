@@ -4,6 +4,7 @@
 <%= javascript_include_tag "looping_helpers" %>
 <%= javascript_include_tag "board_helpers" %>
 <%= javascript_include_tag "peerjs_connection_helpers" %>
+<%= javascript_include_tag "new_sample" %>
 
 <%= javascript_include_tag "board" %>
 <script src="//cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.10.2/dropbox.min.js">
@@ -30,7 +31,7 @@
                 <a id="save-board">SAVE BOARD</a>
             </li>
             <li class="add-sample">
-                <%= link_to "ADD SAMPLE", new_sample_path %>
+                <a id="add-sample">ADD SAMPLE</a>
             </li>
             <% if user_signed_in? %>
                 <div id="username-hidden" style="display:none"><%= current_user.username %></div>
@@ -156,11 +157,14 @@
                 <div class="modal-content">
                     <div class="connection-black modal-header">
                         <span class="modal-title" id="username-message">YOU ARE <span id="username-for-connection" style="color:red"></span><br />
-                        <span class="modal-title">CONNECT WITH SOMEONE ELSE ONLINE...</span>
                     </div>
                     <div class="modal-body">
+                        <p id="connected-users-title">CURRENTLY CONNECTED USERS:</p>
+                        <ul id="connected-users" class="modal-ul">
+                        </ul>
+                        <p id="online-users-title">ALL ONLINE USERS:</p>
                         <ul id="online-users" class="modal-ul">
-                            <li class="online-user">no one's online :(</li>
+                            <li class="online-user">NO ONE ELSE IS ONLINE :(</li>
                         </ul>
                     </div>
                 </div>
@@ -229,7 +233,36 @@
             </div>
         </div>
         <!-- end board save modal -->
+    <!-- add sample modal -->
+         <div id="add-sample-modal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
 
+                <!-- modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">ADD SAMPLE</h4>
+
+                    </div>
+                     <div class="modal-body">
+                        <h1 style="cursor:pointer" id="dropbox-connect"></h1>
+                        <div id="recording-interface"></div>
+                        <div id="recordingslist"></div>
+                        <!-- append options here -->
+                     </div>
+                    <div class="modal-footer">
+                        <div id="rec-buttons" style="display:none">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" id="new-sample-save">SAVE</button>
+                            <button type="button" class="btn btn-success" id="new-sample-clear">CLEAR</button>
+                            <button type="button" class="btn btn-success" data-dismiss="modal" id="new-sample-cancel">CANCEL</button>
+                        </div>
+                        <!-- <button type="button" class="btn btn-success" data-dismiss="modal" id="confirm-board-save">SAVE</button> -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- end add sample modal -->
     </div>
     <!-- end main page -->
 </div>

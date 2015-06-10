@@ -4,7 +4,9 @@ function CreateRecorder(client, context){
     context: context,
     fileName: null,
     //states are recording, full, cleared
-    state: "cleared"
+    state: "cleared",
+    recButtonHTML: '<svg height="100" width="100" id="record"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>',
+    stopButtonHTML: '<svg height="100" width="100" id="stop"><rect width="100" height="100" stroke="black" fill="blue" stroke-width=3/></svg>'
   };
 
   newRecorder.initAudio = function(stream){
@@ -60,6 +62,28 @@ function CreateRecorder(client, context){
       }
     });
   }
+  //pass in a jQuery div and this will add Save, Clear and Cancel buttons
+  newRecorder.activateButtons = function(){
+    $("#rec-buttons").off();
+    $("#rec-buttons").show();
+    $("#new-sample-save").on("click", function(){
+      if (rec.state === "full"){
+        rec.save();
+        $("#recordingslist").empty();
+      }
+    });
+    $("#new-sample-clear").on("click", function(){
+      rec.recorder.clear();
+      rec.state = "cleared";
+      $("#recordingslist").empty();
+    });
+    $("#new-sample-cancel").on("click", function(){
+      rec.recorder.clear();
+      rec.state = "cleared";
+      $("#recordingslist").empty();
+    });
+
+  }
 
 
   return newRecorder;
@@ -71,6 +95,22 @@ function initializeRecorder(client, context){
   navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
   navigator.getUserMedia({audio:true}, rec.initAudio, function(e) {
     console.log(e);
+  });
+  $('#recording-interface').empty();
+  $('#recording-interface').append(rec.recButtonHTML);
+
+  $('#recording-interface').click(function(event){
+    if (rec.state === "cleared"){
+      rec.start();
+      $(this).empty();
+      $(this).append(rec.stopButtonHTML);
+    }else if (rec.state === "recording"){
+      rec.stop();
+      $(this).empty();
+      $(this).append(rec.recButtonHTML);
+      rec.activateButtons();
+    }
+
   });
 
   addEventListener("keydown", function(event) {
@@ -100,6 +140,72 @@ function initializeRecorder(client, context){
   });
 
 }
+
+
+function dropboxFlow(client, context, $button) {
+  //takes user token from database and returns authenticated client object
+  function authenticateFromDatabase(token){
+    var client = new Dropbox.Client({token: token})
+    console.log("I got yr dropbox info so I logged you in!!!!")
+    return client;
+  }
+
+  function saveUser (token){
+    $.post( "/users/save_token", {dropBoxToken:token});
+  }
+  function handleError(error){
+    console.log(error);
+  }
+
+  function dropboxSignInFlow(client){
+    $button.append("CLICK HERE TO CONNECT TO DROPBOX")
+    $button.on("click", function() {
+      // The user will have to click an 'Authorize' button.
+      client.authenticate(function(error, client) {
+        if (error) {
+          return handleError(error);
+        }
+      });
+    });
+  }
+
+
+  function authenticateWithDropbox(error, client){
+    if (error) {
+      return handleError(error);
+    }
+    //if they are back from flow, save user's token in DB 
+    if (client.isAuthenticated()) {
+      saveUser(client.credentials().token)
+      console.log("you have been authenticated!")
+      initializeRecorder(client, context);
+    //TODO need to clear client so that next user doesn't have access to it
+
+    } else {
+      // show and set up the "Sign into Dropbox" button
+      //once they click and authenticate they will come back to this page authenticated
+      dropboxSignInFlow(client);
+    }
+
+  }
+
+
+  $.getJSON( "/samples/new.json", function( data ) {
+
+    //if there's a user token from db, authenticate with that
+    if(data.user_token !== null){
+      client = authenticateFromDatabase(data.user_token);
+      initializeRecorder(client, context);
+    }
+    else {
+    //create client object from our app_key
+    client = new Dropbox.Client({ key: data.app_key });
+    //send user through authentication process
+      client.authenticate({interactive: false}, authenticateWithDropbox);
+    }
+  });
+
+};
 
 //TODO
 //save sample to database-

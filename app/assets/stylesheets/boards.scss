@@ -226,6 +226,10 @@ div.modal-footer {
   color: yellow;
 }
 
+.sample-list.activeSample {
+  background-color: black;
+}
+
 /* connection modals */
 .connection .modal-header {
   color: red;
@@ -239,9 +243,22 @@ div.modal-footer {
   color: red;
 }
 
+#connected-users-title {
+  padding-left: 20px;
+  color: black;
+}
 
-.sample-list.activeSample {
-  background-color: black;
+#online-users-title {
+  padding-left: 20px;
+  color:black;
+}
+
+#connected-users li {
+  padding-left: 40px;
+}
+
+#online-users li {
+  padding-left: 40px;
 }
 
 /* load board modals */
@@ -308,4 +325,18 @@ div.modal-footer {
   font-size: 1.5em;
   margin-bottom: 0;
   color: pink;
+}
+
+/* make list item deletable */
+/* to use this on a list item, add '<div class="deletable">✕</div>' inside the li tag */
+
+.modal-body ul li div.deletable-li {
+  padding: 0px 10px;
+  display: block;
+  float: right;
+  color: #2C2C2C;
+}
+
+.modal-body ul li div.deletable-li:hover {
+  background-color: white;
 }

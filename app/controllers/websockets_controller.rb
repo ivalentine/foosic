@@ -13,8 +13,12 @@ class WebsocketsController < WebsocketRails::BaseController
   end
 
   def get_online_users
+    currently_connected_users = message
     users = connection_store.collect_all(:username)
     users.delete(connection_store[:username])
+    currently_connected_users.each do |user|
+      users.delete(user)
+    end
     if users.size > 0
       trigger_success users
     end

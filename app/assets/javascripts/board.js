@@ -175,15 +175,59 @@ $(document).ready(function() {
         userBoard.peerToPeer = createPeerToPeer(peerToPeerSpec);
     }
 
-    // USER MANAGEMENT
-    // open modal on click from menu
-    $('#connect').click(function(){
+    // CONNECTION MANAGEMENT
+    function triggerConnectionMenu(){
         // Start peer mode if needed
         if (!userBoard.peerToPeer) {
             initializePeerToPeer(userBoard);
         }
 
+        // get the currently connected users
+        var currentlyConnectedUsers = [];
+        for (var i = 0; i < userBoard.peerToPeer.connections.length; i++) {
+            var connection = userBoard.peerToPeer.connections[i];
+            if (connection.open) {
+                currentlyConnectedUsers.push(connection.peer);
+            }
+        }
+
         // toggle online users modal
+        $('#connected-users').empty();
+        for (var i = 0; i < currentlyConnectedUsers.length; i++) {
+            $('#connected-users').append('<li class="connected-user">' + currentlyConnectedUsers[i] + '<div class="deletable-li" data-username="' + currentlyConnectedUsers[i] + '">✕</div></li>');
+            // enable connection closing
+            $('.deletable-li[data-username=' + currentlyConnectedUsers[i] + ']').one('click',function(){
+                for (var i = 0; i < userBoard.peerToPeer.connections.length; i++) {
+                    if (userBoard.peerToPeer.connections[i].peer === currentlyConnectedUsers[i]) {
+                        // gracefully close connection
+                        userBoard.peerToPeer.connections[i].close();
+                        // delete connection
+                        delete userBoard.peerToPeer.connections[i];
+                        // delete board and peer associated with the connection
+                        for (var j = 0; j < userBoard.peerToPeer.peerIds.length; j++) {
+                            if (userBoard.peerToPeer.peerIds[j] === currentlyConnectedUsers[i]) {
+                                delete userBoard.peerToPeer.peerIds[j];
+                                delete userBoard.peerToPeer.peerBoards[j];
+                            }
+                        }
+                    }
+                }
+                $(this).closest('li').remove();
+                $('#online-users-modal').modal('toggle');
+                window.setTimeout(function(){
+                    triggerConnectionMenu();
+                },1000);
+            });
+        }
+        if (currentlyConnectedUsers.length === 0) {
+            $('#connected-users-title').css('display','none');
+        } else {
+            $('#connected-users-title').css('display','block');
+        }
+
+        $('#connected-users').append();
+        $('#online-users').empty();
+        $('#online-users').append('<li class="online-user">NO ONE ELSE IS ONLINE :(</li>');
         $('#online-users-modal').modal('toggle');
 
         // populate username
@@ -207,9 +251,12 @@ $(document).ready(function() {
             });
         }
 
-        // get the online users using WebSocket dispatcher
-        dispatcher.trigger('get_online_users', 1, callback);
-    });
+        // get online users via websocket connection
+        dispatcher.trigger('get_online_users', currentlyConnectedUsers, callback);
+    }
+
+    // open connection modal on click from menu
+    $('#connect').click(triggerConnectionMenu);
 
     // websockets
     var username, channel, requestedConnection, allSampleData;
@@ -311,6 +358,22 @@ $(document).ready(function() {
                 }
             });
         } else {
+            $('#sign-in-to-save-modal').modal('toggle');
+            window.setTimeout(function(){
+                $('#sign-in-to-save-modal').modal('toggle');
+            }, 1500);
+        }
+    });
+
+    //adding a sample
+    //move this client variable inside click handler? Or clear it at end of handler?
+    var client;
+    $('#add-sample').click(function(){
+        if (signedIn) {
+            $('#add-sample-modal').modal('toggle');
+            $button = $("#dropbox-connect")
+            dropboxFlow(client, context, $button)
+        }else {
             $('#sign-in-to-save-modal').modal('toggle');
             window.setTimeout(function(){
                 $('#sign-in-to-save-modal').modal('toggle');
