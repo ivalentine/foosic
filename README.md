@@ -38,13 +38,3 @@ Link to your blog, twitter, etc!
 ## License
 
 Foosic is MIT Licensed. See LICENSE for details.
-
-<div class="mermaid">
-  graph TD
-    id1[test]
-    id2[test2]
-    id1-->id2
-</div>
-
-<script src="mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true});</script>
